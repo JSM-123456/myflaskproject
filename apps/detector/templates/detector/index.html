@@ -1,0 +1,16 @@
+{% extends "detector/base.html" %}
+{% block content %}
+<div class="col-md-10 text-right dt-image-register-btn">
+    <a href="{{ url_for('detector.upload_count') }}" class="btn btn-primary">이미지 불러오기</a>
+</div>
+{% for user_image in user_images %}
+<div class="card col-md-7 dt-image-content">
+    <header class="d-flex justify-content-between">
+        <div class="dt-image-username">{{ user_image.User.username }}</div>
+    </header>
+    <section>
+        <img src="{{ user_image.UserImage.image_path }}" alt="이미지">
+    </section>
+</div>
+{% endfor %}
+{% endblock %}

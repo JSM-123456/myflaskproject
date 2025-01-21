@@ -5,7 +5,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from pathlib import Path
 from apps.config import config
-
+from flask_cors import CORS
 
 db = SQLAlchemy()
 csrf = CSRFProtect()
@@ -17,6 +17,7 @@ login_manager.login_message = ""
 
 def create_app(config_key) :
     app = Flask(__name__)
+
 
     app.config.from_object(config[config_key])
     csrf.init_app(app)
@@ -31,4 +32,8 @@ def create_app(config_key) :
     from apps.auth import views as auth_views
     app.register_blueprint(auth_views.auth, url_prefix="/auth")
 
+    from apps.detector import views as dt_views
+    app.register_blueprint(dt_views.dt)
+
     return app
+

@@ -1,0 +1,9 @@
+{% extends "detector/base.html" %}
+{% block content %}
+
+<form method="post" action="{{ url_for('detector.upload_count') }}">
+    {{ form.csrf_token }}
+    {{ form.number(class="", placeholder="몇 마리") }}
+    {{ form.submit(class="") }}
+</form>
+{% endblock %}

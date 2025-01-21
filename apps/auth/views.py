@@ -37,7 +37,7 @@ def signup():
         # GET 파라미터에 next 키가 존재하고, 값이 없는 경우 사용자 일람 페이지로 리다이렉트한다.
         next_ = request.args.get("next")
         if next_ is None or not next_.startswith("/"):
-            next_ = url_for("crud.users")
+            next_ = url_for("detector.index")
             return redirect(next_)
     return render_template("auth/signup.html", form=form)
 
@@ -49,7 +49,7 @@ def login():
 
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
-            return redirect(url_for("crud.users"))
+            return redirect(url_for("detector.index"))
         flash("메일 주소 또는 비밀번호가 일치하지 않습니다.")
     return render_template("auth/login.html", form=form)
 

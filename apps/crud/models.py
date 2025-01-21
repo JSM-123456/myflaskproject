@@ -12,6 +12,7 @@ class User(db.Model, UserMixin) :
     password_hash = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    user_images = db.relationship("UserImage", backref="user", order_by="desc(UserImage.id)")
 
     @property
     def password(self):
