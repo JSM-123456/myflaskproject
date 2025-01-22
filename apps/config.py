@@ -5,7 +5,7 @@ basedir = Path(__file__).parent.parent
 class BaseConfig:
     SECRET_KEY="tjdals"
     WTF_CSRF_SECRET_KEY="dlqslek"
-    UPLOAD_FOLDER = str(Path(basedir, "apps", "images"))
+    UPLOAD_FOLDER = str(Path(basedir, "apps", "static", "images"))
     LABELS = [
         "unlabeled",
         "person",

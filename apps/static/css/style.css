@@ -1,5 +1,6 @@
 body {
-    background-color: #f5f5f5;
+    background-color: #E2E8D5;
+    padding-top: 60px;
 }
 h4 {
    margin-top: 20px;
@@ -73,4 +74,80 @@ input[type="search"] {
 }
 .dt-image-submit {
     margin-left: 10px;
+}
+
+.nav-link {
+    color: #FFD700;
+}
+
+.navbar, .navbar-title, .nav-user {
+    background-color: rgba(150, 111, 88, 1);
+    color: #F5F5DC;
+}
+
+.upload-form {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 6px 6px 6px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.upload-form .form-actions {
+    text-align: right;
+}
+
+.form-heading {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin-bottom: 20px;
+}
+.styled-form .form-group {
+    margin-bottom: 15px;
+}
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.navbar-brand span {
+    position: absolute;
+    opacity: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: opacity 0.5s ease;
+}
+
+/* 텍스트를 담을 공간을 고정하여 크기와 위치가 변하지 않도록 설정 */
+.navbar-brand {
+    position: relative;
+    display: inline-block;
+    width: auto;
+    height: 40px; /* 텍스트가 들어갈 높이 설정 */
 }

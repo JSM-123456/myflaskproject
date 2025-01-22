@@ -8,14 +8,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand " href="{{ url_for('detector.index') }}">detector</a>
+            <a class="navbar-brand navbar-title" href="{{ url_for('detector.index') }}">
+                <span id="dog-text"></span>
+                <span id="detector-text"></span>
+            </a>
 
             <ul class="navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <span class="nav-link">{{ current_user.username }}</span>
+                    <span class="nav-link nav-user">{{ current_user.username }}</span>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('auth.logout') }}" class="nav-link">로그아웃</a>
@@ -35,5 +38,34 @@
     <section class="container">
         {% block content %}{% endblock %}
     </section>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+            const dogText = "Dog";
+            const detectorText = "Detector";
+            const dogElement = document.getElementById("dog-text");
+            const detectorElement = document.getElementById("detector-text");
+
+            let isDogVisible = true;
+
+            function toggleText() {
+                if (isDogVisible) {
+                    dogElement.textContent = dogText;
+                    dogElement.style.opacity = 1;
+                    detectorElement.style.opacity = 0;
+                } else {
+                    detectorElement.textContent = detectorText;
+                    detectorElement.style.opacity = 1;
+                    dogElement.style.opacity = 0;
+                }
+
+                isDogVisible = !isDogVisible;
+
+                // 2초마다 텍스트 전환
+                setTimeout(toggleText, 2000);
+            }
+
+            toggleText(); // 텍스트 전환 시작
+        });
+</script>
 </body>
 </html>

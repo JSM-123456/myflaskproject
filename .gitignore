@@ -282,3 +282,5 @@ pyrightconfig.json
 /migrations
 
 model.pt
+
+.DS_Store

@@ -10,11 +10,12 @@ from flask_login import current_user, login_required
 from apps.app import db
 from apps.crud.models import User
 from apps.detector.models import UserImage, UserImageTag
-from apps.detector.forms import DogNumberForm, DetectorForm
+from apps.detector.forms import DogNumberForm, DetectorForm, DeleteForm
 from flask_cors import CORS
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
-
+import uuid 
+from io import BytesIO
 
 dt = Blueprint(
     "detector", 
@@ -30,7 +31,19 @@ def index():
         .filter(User.id == UserImage.user_id)
         .all()
     )
-    return render_template("detector/index.html", user_images=user_images)
+    # 태그 일람을 가져온다
+    user_image_tag_dict = {}
+    for user_image in user_images:
+        # 이미지에 연결할 태그 일람을 가져온다
+        user_image_tags = (
+            db.session.query(UserImageTag)
+            .filter(UserImageTag.user_image_id == user_image.UserImage.id).all()
+        )
+        user_image_tag_dict[user_image.UserImage.id] = user_image_tags
+        detector_form = DetectorForm()
+        delete_form = DeleteForm()
+
+    return render_template("detector/index.html", user_images=user_images, user_image_tag_dict=user_image_tag_dict, detector_form=detector_form, delete_form=delete_form)
 
 @dt.route("/<filename>")
 def image_file(filename):
@@ -104,7 +117,17 @@ def draw_texts(result_image, line, c1, cv2, color, labels, label) :
 # 매개변수 : 물체 감지하라고 주어진 이미지의 경로
 def exec_detect(target_image_path) :
     labels = current_app.config["LABELS"]
-    image = Image.open(target_image_path)
+    response = requests.get(target_image_path)
+
+    try :
+        response.raise_for_status()  
+    except :
+        pass 
+
+    image = Image.open(BytesIO(response.content))
+
+    
+    # image = Image.open(target_image_path) 
 
     # 모델이 학습했던 유형의 데이터를 전달해줘야 예측도 가능
     # 텐서 : 다차원 배열
@@ -120,17 +143,21 @@ def exec_detect(target_image_path) :
     ):
         # 점수가 0.5점 이상이고 신규 발견된 라벨이라면
         if score > 0.5 and labels[label] not in tags :
-            color = make_color(labels)
-            line = make_line(result_image)
-            c1 = (int(box[0]), int(box[1]))
-            c2 = (int(box[2]), int(box[3]))
 
-            cv2 = draw_lines(c1, c2, result_image, line, color)
-            cv2 = draw_texts(result_image, line, c1, cv2, color, labels, label)
-            tags.append(labels[label])
+            if labels[label] == "dog" : 
+                color = make_color(labels)
+                line = make_line(result_image)
+                c1 = (int(box[0]), int(box[1]))
+                c2 = (int(box[2]), int(box[3]))
+
+                cv2 = draw_lines(c1, c2, result_image, line, color)
+                cv2 = draw_texts(result_image, line, c1, cv2, color, labels, label)
+                tags.append(labels[label])
 
     detected_image_file_name = str(uuid.uuid4()) + ".jpg"
-    detected_image_file_path = str(Path(current_app.config["UPLOAD_FOLDER"], detected_image_file_name))
+    detected_image_file_path = str(Path(
+        current_app.config["UPLOAD_FOLDER"], detected_image_file_name
+        ))
 
     cv2.imwrite(detected_image_file_path, cv2.cvtColor(
         result_image, cv2.COLOR_RGB2BGR
@@ -156,11 +183,8 @@ def detect(image_id):
     if user_image is None :
         flash("물체 감지 대상의 이미지가 존재하지 않습니다.")
         return redirect(url_for("detector.index"))
-    target_image_path = Path(
-        current_app.config["UPLOAD_FOLDER"], user_image.image_path
-    )
 
-    tags, detected_image_file_name = exec_detect(target_image_path)
+    tags, detected_image_file_name = exec_detect(user_image.image_path)
     try:
         save_detected_image_tags(user_image, tags, detected_image_file_name)
     except SQLAlchemyError as e:
@@ -168,4 +192,18 @@ def detect(image_id):
         db.session.rollback()
         current_app.logger.error(e)
         return redirect(url_for("detector.index"))
+    return redirect(url_for("detector.index"))
+
+@dt.route("/images/delete/<int:image_id>", methods=["POST"])
+@login_required
+def delete_image(image_id):
+    try:
+        db.session.query(UserImageTag).filter(UserImageTag.user_image_id == image_id).delete()
+        db.session.query(UserImage).filter(UserImage.id == image_id).delete()
+        db.session.commit()
+    except SQLAlchemyError as e:
+        flash("이미지 삭제 처리에서 오류가 발생했습니다.")
+        current_app.logger.error(e)
+        db.session.rollback()
+    
     return redirect(url_for("detector.index"))

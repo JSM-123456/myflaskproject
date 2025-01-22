@@ -1,9 +1,16 @@
 {% extends "detector/base.html" %}
 {% block content %}
 
-<form method="post" action="{{ url_for('detector.upload_count') }}">
-    {{ form.csrf_token }}
-    {{ form.number(class="", placeholder="몇 마리") }}
-    {{ form.submit(class="") }}
-</form>
+<section class="upload-form">
+    <h2 class="form-heading">🐾강아지 랜덤 이미지🐾</h2>
+    <form method="post" action="{{ url_for('detector.upload_count') }}" class="styled-form">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.number(class="input-field", placeholder="이미지 갯수 입력") }}
+        </div>
+        <div class="form-actions">
+            {{ form.submit(class="btn btn-primary", value="Dog API에 보내기📨") }}
+        </div>
+    </form>
+</section>
 {% endblock %}
