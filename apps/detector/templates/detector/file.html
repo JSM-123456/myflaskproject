@@ -1,0 +1,16 @@
+{% extends "detector/base.html" %}
+{% block content %}
+
+<section class="upload-form">
+    <h2 class="form-heading">이미지 파일 업로드</h2>
+    <form enctype="multipart/form-data" method="post" action="{{ url_for('detector.upload_file') }}" class="styled-form">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.image(class="input-field", placeholder="파일 찾기") }}
+        </div>
+        <div class="form-actions">
+            {{ form.submit(class="btn btn-primary", value="업로드하기📨") }}
+        </div>
+    </form>
+</section>
+{% endblock %}

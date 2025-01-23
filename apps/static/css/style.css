@@ -46,9 +46,17 @@ input[type="search"] {
 .dt-search {
     height: 28px !important;
 }
+.dt-image-container {
+    display: flex;
+    flex-wrap: wrap; /* 줄바꿈 허용 */
+    gap: 20px; /* 카드 간격 */
+    justify-content: flex-start; /* 가로 여백 균등 배치 */
+}
 .dt-image-content {
-    margin: 20px auto;
-    padding: 0;
+    flex: 1 1 calc(33.333% - 20px); /* 가로 3등분 */
+    max-width: calc(33.333% - 20px); /* 최대 너비 설정 */
+    box-sizing: border-box; /* 여백 포함 계산 */
+    margin-bottom: 20px; /* 아래쪽 간격 */
 }
 .dt-image-username {
     padding-top: 15px;
@@ -150,4 +158,35 @@ input[type="search"] {
     display: inline-block;
     width: auto;
     height: 40px; /* 텍스트가 들어갈 높이 설정 */
+}
+
+.heading-1 {
+    text-align: center; /* 텍스트를 가운데 정렬 */
+    margin: 20px 0; /* 적당한 여백 추가 */
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.heading-1 a {
+    text-decoration: none; /* 기본 밑줄 제거 */
+    color: inherit; /* 부모의 색상 상속 */
+}
+
+.heading-1 a:hover {
+    text-decoration: none; /* 커서를 올렸을 때 밑줄 제거 유지 */
+}
+
+.dt-image-register-btn {
+    text-align: right; /* 텍스트 정렬을 오른쪽으로 */
+    margin-left: 20px; /* 버튼 아래 여백 추가 */
+    padding-bottom: 10px;
+    padding-right: auto;
+}
+.dt-image-register-btn a {
+    display: inline-block; /* 버튼을 인라인 블록으로 설정 */
+}
+
+.p-2 {
+    
 }

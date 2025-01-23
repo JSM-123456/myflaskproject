@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 from apps.app import db
 from apps.crud.models import User
 from apps.detector.models import UserImage, UserImageTag
-from apps.detector.forms import DogNumberForm, DetectorForm, DeleteForm
+from apps.detector.forms import DogNumberForm, DetectorForm, DeleteForm, UploadImageForm
 from flask_cors import CORS
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
@@ -29,6 +29,7 @@ def index():
         db.session.query(User, UserImage)
         .join(UserImage)
         .filter(User.id == UserImage.user_id)
+        .order_by(UserImage.updated_at.desc())
         .all()
     )
     # 태그 일람을 가져온다
@@ -53,13 +54,31 @@ def image_file(filename):
 @login_required
 def upload_count():
     form = DogNumberForm()
-
     if form.validate_on_submit() :
-
         return redirect(url_for("detector.upload_image", number=form.number.data))
 
     return render_template("detector/upload.html", form=form)
 
+
+@dt.route("/file", methods=["GET", "POST"])
+def upload_file():
+    img_form = UploadImageForm()
+    if img_form.validate_on_submit():
+        file = img_form.image.data
+        ext = Path(file.filename).suffix
+        image_uuid_file_name = str(uuid.uuid4()) + ext
+        img_path = Path(current_app.config["UPLOAD_FOLDER"], image_uuid_file_name)
+        print(img_path)
+        file.save(img_path)
+        # DB에 저장
+        user_image = UserImage(
+            user_id = current_user.id, image_path = image_uuid_file_name
+        )
+        db.session.add(user_image)
+        db.session.commit()
+        return redirect(url_for("detector.index"))
+    
+    return render_template("detector/file.html", form=img_form)
 
 @dt.route("/uploadimage/<number>", methods=["GET", "POST"])
 def upload_image(number):
@@ -117,14 +136,18 @@ def draw_texts(result_image, line, c1, cv2, color, labels, label) :
 # 매개변수 : 물체 감지하라고 주어진 이미지의 경로
 def exec_detect(target_image_path) :
     labels = current_app.config["LABELS"]
-    response = requests.get(target_image_path)
+    image = None
+    if "http" in target_image_path :
+        response = requests.get(target_image_path)
 
-    try :
-        response.raise_for_status()  
-    except :
-        pass 
-
-    image = Image.open(BytesIO(response.content))
+        try :
+            response.raise_for_status()  
+        except :
+            pass 
+        image = Image.open(BytesIO(response.content))
+    else :
+        image = Image.open(str(Path(
+        current_app.config["UPLOAD_FOLDER"], target_image_path)))
 
     
     # image = Image.open(target_image_path) 
@@ -144,15 +167,14 @@ def exec_detect(target_image_path) :
         # 점수가 0.5점 이상이고 신규 발견된 라벨이라면
         if score > 0.5 and labels[label] not in tags :
 
-            if labels[label] == "dog" : 
-                color = make_color(labels)
-                line = make_line(result_image)
-                c1 = (int(box[0]), int(box[1]))
-                c2 = (int(box[2]), int(box[3]))
+            color = make_color(labels)
+            line = make_line(result_image)
+            c1 = (int(box[0]), int(box[1]))
+            c2 = (int(box[2]), int(box[3]))
 
-                cv2 = draw_lines(c1, c2, result_image, line, color)
-                cv2 = draw_texts(result_image, line, c1, cv2, color, labels, label)
-                tags.append(labels[label])
+            cv2 = draw_lines(c1, c2, result_image, line, color)
+            cv2 = draw_texts(result_image, line, c1, cv2, color, labels, label)
+            tags.append(labels[label])
 
     detected_image_file_name = str(uuid.uuid4()) + ".jpg"
     detected_image_file_path = str(Path(
@@ -207,3 +229,4 @@ def delete_image(image_id):
         db.session.rollback()
     
     return redirect(url_for("detector.index"))
+
